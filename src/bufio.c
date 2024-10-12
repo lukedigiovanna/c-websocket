@@ -66,30 +66,27 @@ int bufio_readbyte(struct bufio* self, char* ch) {
         self->length += bytes;
 
         self->buffer[self->length] = '\0';
-        printf("READ (%d bytes):\n%s\n", self->length, self->buffer);
     }
 
     *ch = self->buffer[self->head++];
 
-    printf("Read byte: %d\n", *ch);
-
     return 0;
 }
 
-size_t bufio_readline(struct bufio* self, size_t* len) {
+size_t bufio_readline(struct bufio* self) {
     size_t offset = self->head;
 
     char c;
     while (bufio_readbyte(self, &c) == 0 && c != '\n');
 
-    *len = self->head - offset;
+    size_t len = self->head - offset;
+    self->buffer[len - 1] = '\0'; 
 
     return offset;
 }
 
 size_t bufio_read(struct bufio* self, size_t* len) {
-    
-    return NULL;
+    return 0;
 }
 
 void bufio_appends(struct bufio* self, char* content) {

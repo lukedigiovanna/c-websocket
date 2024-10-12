@@ -19,9 +19,9 @@ void bufio_destroy(struct bufio* self);
 int bufio_readbyte(struct bufio* self, char* ch);
 
 // Reads the content of the buffer up until the next LF
-// Returns the offset of the pointer in the buffer and outputs the length
-// of the line into `len`.
-size_t bufio_readline(struct bufio* self, size_t* len);
+// Returns the offset of the pointer in the buffer and replaces the LF with
+// a null terminator.
+size_t bufio_readline(struct bufio* self);
 
 // Reads the remaining content of the buffer until EOF
 // Stores the length of the read content into `len`

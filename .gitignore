@@ -1,2 +1,2 @@
-*.o
-server
+src/*.o
+src/server

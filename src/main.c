@@ -2,6 +2,7 @@
 
 #include "socket.h"
 #include "bufio.h"
+#include "http.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,18 +13,10 @@
 
 static void handle_client(int client_fd) {
     struct bufio* buffer = bufio_create(client_fd);
-    size_t offset, len;
-    char* ptr;
     
-    offset = bufio_readline(buffer, &len);
-    ptr = bufio_offset2ptr(buffer, offset);
-    ptr[len - 1] = '\0';
-    printf("%s\n", ptr);
-    
-    offset = bufio_readline(buffer, &len);
-    ptr = bufio_offset2ptr(buffer, offset);
-    ptr[len - 1] = '\0';
-    printf("%s\n", ptr);
+    // parse as http request
+    struct http_transaction ta;
+    http_parse(buffer, &ta);
 
     bufio_destroy(buffer);
 }
