@@ -3,19 +3,19 @@
 
 #include "bufio.h"
 
+#include "buffer.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
 
-// Amount to read on each call to "read"
+// Amount to read on each call to "recv"
 #define READSIZE 2048
 
 struct bufio {
-    char* buffer; // Internal buffer
-    size_t head;   // Position in reading/writing
-    size_t length; // Amount of content read into buffer
-    size_t capacity; // Available capacity of the buffer
+    struct buffer* buffer; // Internal buffer used to store read content
+    size_t head;  // Position in reading/writing
     int fd; // File descriptor to read from
 };
 
@@ -27,48 +27,34 @@ struct bufio* bufio_create(int fd) {
         exit(EXIT_FAILURE);
     }
 
-    self->buffer = malloc(READSIZE);
+    self->buffer = buffer_create(READSIZE);
     self->head = 0;
-    self->length = 0;
-    self->capacity = READSIZE;
     self->fd = fd;
 
     return self;
 }
 
 void bufio_destroy(struct bufio* self) {
-    free(self->buffer);
+    buffer_destroy(self->buffer);
     free(self);
 }
 
 int bufio_readbyte(struct bufio* self, char* ch) {
-    // Ensure capacity of buffer
-    if (self->head + READSIZE >= self->capacity) {
-        // Then need to read more into the buffer (double it)
-        size_t new_size = self->capacity * 2 + READSIZE;
-        self->buffer = realloc(self->buffer, new_size);
-
-        if (self->buffer == 0) {
-            perror("realloc failed");
-            exit(EXIT_FAILURE);
-        }
-    }
-    
+    static char read_buffer[READSIZE];
     // Read more from socket if we already read everything in the buffer
-    if (self->head >= self->length) {
-        ssize_t bytes = recv(self->fd, self->buffer + self->head, READSIZE, MSG_NOSIGNAL);
+    if (self->head >= buffer_length(self->buffer)) {
+        ssize_t bytes = recv(self->fd, read_buffer, READSIZE, MSG_NOSIGNAL);
         
-        if (bytes < 0) {
-            perror("recv");
+        if (bytes <= 0) {
             return -1;
         }
 
-        self->length += bytes;
-
-        self->buffer[self->length] = '\0';
+        buffer_append(self->buffer, read_buffer, bytes);
     }
 
-    *ch = self->buffer[self->head++];
+    *ch = *bufio_offset2ptr(self, self->head);
+
+    self->head++;
 
     return 0;
 }
@@ -80,12 +66,21 @@ size_t bufio_readline(struct bufio* self) {
     while (bufio_readbyte(self, &c) == 0 && c != '\n');
 
     size_t len = self->head - offset;
-    self->buffer[len - 1] = '\0'; 
+    *bufio_offset2ptr(self, len - 1) = '\0';
 
     return offset;
 }
 
 size_t bufio_read(struct bufio* self, size_t* len) {
+    // size_t offset = self->head;
+    // char c;
+    // while (bufio_readbyte(self, &c) == 0);
+
+    // if (len != NULL) {
+    //     *len = self->head - offset;
+    // }
+
+    // return offset;
     return 0;
 }
 
@@ -98,7 +93,7 @@ void bufio_write(struct bufio* self, int fd) {
 }
 
 char *bufio_offset2ptr(struct bufio* self, size_t offset) {
-    return self->buffer + offset;
+    return buffer_offset2ptr(self->buffer, offset);
 }
 
 #endif

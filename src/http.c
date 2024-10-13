@@ -21,9 +21,10 @@ static enum http_method get_method(char* method_str) {
 }
 
 int http_parse(struct bufio* buff, struct http_transaction* ta) {
-    char* header = bufio_offset2ptr(buff, bufio_readline(buff));
+    size_t off = bufio_readline(buff);
+    char* header = bufio_offset2ptr(buff, off);
     // expect header to match format: <METHOD> <PATH> <VERSION>
-    // Use thread-safe strtok: strtok_r
+    // Use thread-safe strtok_r
     char* save_ptr;
     char* method_str = strtok_r(header, " ", &save_ptr);
     char* path_str = strtok_r(NULL, " ", &save_ptr);
@@ -31,6 +32,12 @@ int http_parse(struct bufio* buff, struct http_transaction* ta) {
     printf("Method: %s\n", method_str);
     printf("Path: %s\n", path_str);
     printf("Version: %s\n", version_str);
+
+    // TODO: CHANGE THIS TO SEND AN APPRORIATE ERROR RESPONSE.
+    if (strcasecmp("HTTP/1.1", version_str)) {
+        fprintf(stderr, "http_parse: this HTTP implementation only support HTTP/1.1");
+        return -1;
+    }
 
     ta->method = get_method(method_str);
 
