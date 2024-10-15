@@ -39,14 +39,17 @@ void bufio_destroy(struct bufio* self) {
     free(self);
 }
 
-int bufio_readbyte(struct bufio* self, char* ch) {
+ssize_t bufio_readbyte(struct bufio* self, char* ch) {
     static char read_buffer[READSIZE];
     // Read more from socket if we already read everything in the buffer
     if (self->head >= buffer_length(self->buffer)) {
         ssize_t bytes = recv(self->fd, read_buffer, READSIZE, MSG_NOSIGNAL);
         
-        if (bytes <= 0) {
-            return -1;
+        if (bytes == 0) {
+            return 0;
+        }
+        else if (bytes < 0) {
+            return bytes;
         }
 
         buffer_append(self->buffer, read_buffer, bytes);
@@ -56,32 +59,34 @@ int bufio_readbyte(struct bufio* self, char* ch) {
 
     self->head++;
 
-    return 0;
+    return 1;
 }
 
-size_t bufio_readline(struct bufio* self) {
-    size_t offset = self->head;
+ssize_t bufio_readline(struct bufio* self, size_t* offset) {
+    *offset = self->head;
 
     char c;
-    while (bufio_readbyte(self, &c) == 0 && c != '\n');
+    while (1) {
+        ssize_t rc = bufio_readbyte(self, &c);
+        if (rc < 0) {
+            return rc;
+        }
+        else if (rc == 0 || c == '\n') {
+            break;
+        }
+    }
 
-    size_t len = self->head - offset;
-    *bufio_offset2ptr(self, len - 1) = '\0';
+    size_t len = self->head - *offset;
 
-    return offset;
+    return len;
 }
 
 size_t bufio_read(struct bufio* self, size_t* len) {
-    // size_t offset = self->head;
-    // char c;
-    // while (bufio_readbyte(self, &c) == 0);
-
-    // if (len != NULL) {
-    //     *len = self->head - offset;
-    // }
-
-    // return offset;
-    return 0;
+    size_t offset = self->head;
+    char c;
+    while (bufio_readbyte(self, &c) == 0);
+    *len = self->head - offset;
+    return offset;
 }
 
 void bufio_appends(struct bufio* self, char* content) {
@@ -94,6 +99,10 @@ void bufio_write(struct bufio* self, int fd) {
 
 char *bufio_offset2ptr(struct bufio* self, size_t offset) {
     return buffer_offset2ptr(self->buffer, offset);
+}
+
+size_t bufio_ptr2offset(struct bufio* self, char* ptr) {
+    return buffer_ptr2offset(self->buffer, ptr);
 }
 
 #endif

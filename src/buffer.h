@@ -24,6 +24,10 @@ void buffer_append_str(struct buffer* self, char* str);
 // Ensures the offset is within the bounds of the buffer.
 char* buffer_offset2ptr(struct buffer* self, size_t offset);
 
+// Returns the offset to the given pointer
+// Ensures the ptr is within the bounds of the buffer.
+size_t buffer_ptr2offset(struct buffer* self, char* ptr);
+
 // Returns the pointer associated with this buffer
 char* buffer_getptr(struct buffer* self);
 

@@ -57,6 +57,15 @@ char* buffer_offset2ptr(struct buffer* self, size_t offset) {
     return self->content + offset;
 }
 
+size_t buffer_ptr2offset(struct buffer* self, char* ptr) {
+    if (ptr < self->content || ptr >= self->content + self->length) {
+        fprintf(stderr, "buffer_ptr2offset: ptr not within buffer");
+        exit(EXIT_FAILURE);
+    }
+
+    return (size_t) (ptr - self->content);
+}
+
 char* buffer_getptr(struct buffer* self) {
     return self->content;
 }
