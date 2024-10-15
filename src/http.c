@@ -21,6 +21,14 @@ static enum http_method get_method(char* method_str) {
     }
 }
 
+void http_init_transaction(struct http_transaction* ta, struct bufio* buff) {
+    ta->buffer = buff;
+    ta->websocket_key_offset = 0;
+    ta->websocket_version_offset = 0;
+    ta->websocket_upgrade = false;
+    ta->method = HTTP_UNKNOWN;
+}
+
 static bool http_process_header(struct http_transaction* ta, char* header) {
     // First extract header name
     char* save_ptr;
@@ -28,9 +36,15 @@ static bool http_process_header(struct http_transaction* ta, char* header) {
     char* header_value = strtok_r(NULL, " ", &save_ptr);
     
     if (!strcasecmp("Sec-WebSocket-Key", header)) {
+        ta->websocket_key_offset = bufio_ptr2offset(ta->buffer, header_value);
         return true;
     }
     else if (!strcasecmp("Sec-WebSocket-Version", header)) {
+        ta->websocket_version_offset = bufio_ptr2offset(ta->buffer, header_value);
+        return true;
+    }
+    else if (!strcasecmp("Upgrade", header)) {
+        ta->websocket_upgrade = true;
         return true;
     }
 
@@ -38,11 +52,11 @@ static bool http_process_header(struct http_transaction* ta, char* header) {
     return false;
 }
 
-bool http_parse(struct http_transaction* ta, struct bufio* buff) {
+bool http_parse(struct http_transaction* ta) {
     size_t req_offset, req_length;    
     char* req, *save_ptr;
-    req_length = bufio_readline(buff, &req_offset);
-    req = bufio_offset2ptr(buff, req_offset);
+    req_length = bufio_readline(ta->buffer, &req_offset);
+    req = bufio_offset2ptr(ta->buffer, req_offset);
     req[req_length - 2] = '\0';
     // expect header to match format: <METHOD> <PATH> <VERSION>
     char* method_str = strtok_r(req, " ", &save_ptr);
@@ -67,11 +81,11 @@ bool http_parse(struct http_transaction* ta, struct bufio* buff) {
     size_t header_offset, header_len;
     char* header;
     for (;;) {
-        header_len = bufio_readline(buff, &header_offset);
+        header_len = bufio_readline(ta->buffer, &header_offset);
         if (header_len < 0) {
             return false;
         }
-        header = bufio_offset2ptr(buff, header_offset);
+        header = bufio_offset2ptr(ta->buffer, header_offset);
         if (header_len == 2 && !strcmp(header, "\r\n")) {
             break;
         }
@@ -80,6 +94,19 @@ bool http_parse(struct http_transaction* ta, struct bufio* buff) {
     }
 
     printf("finished parsing request\n");
+    if (ta->websocket_upgrade) {
+        printf("Is websocket upgrade request\n");
+        if (ta->websocket_version_offset) {
+            printf("Version: %s (%ld)\n", 
+                bufio_offset2ptr(ta->buffer, ta->websocket_version_offset), 
+                ta->websocket_version_offset);
+        }
+        if (ta->websocket_key_offset) {
+            printf("Key: %s (%ld)\n", 
+                bufio_offset2ptr(ta->buffer, ta->websocket_key_offset),
+                ta->websocket_key_offset);
+        }
+    }
 
     return 0;
 }

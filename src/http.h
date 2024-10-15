@@ -12,12 +12,20 @@ enum http_method {
 struct http_transaction {
     enum http_method method;
 
-    size_t websocketKeyOffset;
-    size_t websocketVersionOffset;
+    size_t websocket_key_offset;
+    size_t websocket_version_offset;
+
+    bool websocket_upgrade;
+
+    struct bufio* buffer;
 };
+
+// Gives default values to fields of given transaction object and sets
+// the working buffer to read/send from in the transaction.
+void http_init_transaction(struct http_transaction* ta, struct bufio* buff);
 
 // Parses the given buffer to populate the given http_transaction.
 // Returns true on success
-bool http_parse(struct http_transaction* ta, struct bufio* buff);
+bool http_parse(struct http_transaction* ta);
 
 void http_handle_request(struct http_transaction* ta);

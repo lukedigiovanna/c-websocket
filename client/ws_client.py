@@ -11,9 +11,7 @@ HOST = '127.0.0.1'  # Assume local server.
 PORT = 8080
 RESOURCE = '/'
 
-# WebSocket handshake function
 def websocket_handshake(sock):
-    # Generate WebSocket handshake headers
     key = base64.b64encode(b"test_key").decode('utf-8')
     headers = (
         f"GET {RESOURCE} HTTP/1.1\r\n"
@@ -23,23 +21,23 @@ def websocket_handshake(sock):
         f"Sec-WebSocket-Key: {key}\r\n"
         f"Sec-WebSocket-Version: 13\r\n\r\n"
     )
+    
+    headers_raw = headers.encode('utf-8')
 
-    # Send handshake request
-    sock.send(headers.encode('utf-8'))
+    print(f"Sending:\n{headers_raw.decode()}")
 
-    # Receive server response
+    sock.send(headers_raw)
+
     response = sock.recv(1024).decode('utf-8')
     if "101 Switching Protocols" not in response:
         raise Exception("Handshake failed!")
+    
     print("Handshake successful!\n", response)
 
-
-# Encode the WebSocket frame for sending a message
 def encode_frame(data):
     frame_head = bytearray()
     frame_head.append(0x81)  # First byte: FIN bit set, text frame (opcode 0x1)
     
-    # Encode length
     length = len(data)
     if length <= 125:
         frame_head.append(length)

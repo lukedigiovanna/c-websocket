@@ -16,7 +16,12 @@ static void handle_client(int client_fd) {
     
     // parse as http request
     struct http_transaction ta;
-    http_parse(&ta, buffer);
+    http_init_transaction(&ta, buffer);
+    int rc;
+    if ((rc = http_parse(&ta)) != 0) {
+        fprintf(stderr, "http_parse: return non-zeor rc=%d\n", rc);
+        return;
+    }
 
     bufio_destroy(buffer);
 }
