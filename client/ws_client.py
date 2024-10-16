@@ -29,6 +29,8 @@ def websocket_handshake(sock):
     sock.send(headers_raw)
 
     response = sock.recv(1024).decode('utf-8')
+    print(f'Response: {response}')
+
     if "101 Switching Protocols" not in response:
         raise Exception("Handshake failed!")
     

@@ -48,16 +48,23 @@ static bool http_process_header(struct http_transaction* ta, char* header) {
         return true;
     }
 
-    fprintf(stderr, "http_process_header: unrecognized header: %s\n", header_name);
+    fprintf(stderr, "%s: %s\n", header_name, header_value);
+    // fprintf(stderr, "http_process_header: unrecognized header: %s\n", header_name);
     return false;
 }
 
 bool http_parse(struct http_transaction* ta) {
-    size_t req_offset, req_length;    
+    size_t req_offset; 
+    ssize_t req_length;    
     char* req, *save_ptr;
     req_length = bufio_readline(ta->buffer, &req_offset);
+    if (req_length <= 0) {
+        return false;
+    }
+    fprintf(stderr, "off: %d, len: %d\n", req_offset, req_length);
     req = bufio_offset2ptr(ta->buffer, req_offset);
     req[req_length - 2] = '\0';
+    fprintf(stderr, "request: %s\n", req);
     // expect header to match format: <METHOD> <PATH> <VERSION>
     char* method_str = strtok_r(req, " ", &save_ptr);
     if (method_str == NULL) {
@@ -76,6 +83,7 @@ bool http_parse(struct http_transaction* ta) {
     }
 
     ta->method = get_method(method_str);
+    ta->path_offset = bufio_ptr2offset(ta->buffer, path_str);
 
     // read headers
     size_t header_offset, header_len;
@@ -93,9 +101,8 @@ bool http_parse(struct http_transaction* ta) {
         http_process_header(ta, header);
     }
 
-    printf("finished parsing request\n");
     if (ta->websocket_upgrade) {
-        printf("Is websocket upgrade request\n");
+        printf("Is a WebSocket upgrade request.\n");
         if (ta->websocket_version_offset) {
             printf("Version: %s (%ld)\n", 
                 bufio_offset2ptr(ta->buffer, ta->websocket_version_offset), 

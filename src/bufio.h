@@ -1,4 +1,7 @@
-// A buffer is used for writing and reading to a socket
+// A bufio is used for writing and reading to a socket
+// Manages a buffer object.
+
+#include "buffer.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -37,3 +40,6 @@ void bufio_write(struct bufio* self, int fd);
 char* bufio_offset2ptr(struct bufio* self, size_t offset);
 
 size_t bufio_ptr2offset(struct bufio* self, char* ptr);
+
+// Sends the content of the given buffer to the socket stored in the bufio.
+void bufio_send_buffer(struct bufio* self, struct buffer* buffer);

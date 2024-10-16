@@ -21,6 +21,9 @@ int server_bind_and_listen(short port) {
     server_address.sin_port = htons(port);
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
+    int opt = 1;
+    setsockopt(server_socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
     // Bind the socket file descriptor to the given address
     int rc;
     if ((rc = bind(server_socket_fd, 

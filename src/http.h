@@ -11,11 +11,11 @@ enum http_method {
 
 struct http_transaction {
     enum http_method method;
-
-    size_t websocket_key_offset;
-    size_t websocket_version_offset;
+    size_t path_offset;
 
     bool websocket_upgrade;
+    size_t websocket_key_offset;
+    size_t websocket_version_offset;
 
     struct bufio* buffer;
 };

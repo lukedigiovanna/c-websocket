@@ -44,7 +44,7 @@ void buffer_append(struct buffer* self, void* data, size_t len) {
 }
 
 void buffer_append_str(struct buffer* self, char* str) {
-    size_t len = strlen(str);
+    size_t len = strlen(str) + 1;
     buffer_append(self, str, len);
 }
 
