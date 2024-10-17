@@ -3,6 +3,7 @@
 #include "socket.h"
 #include "bufio.h"
 #include "http.h"
+#include "base64.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -35,6 +36,12 @@ static void handle_client(int client_fd) {
 }
 
 int main(int argc, char* argv[]) {
+    char* str = "light work";
+    char* encode = base64_encode((void*) str, 10);
+
+    printf("encode(%s)=%s\n", str, encode);
+
+    return 0;
     // Set up a socket server
     int server_socket_fd = server_bind_and_listen(PORT);
 
