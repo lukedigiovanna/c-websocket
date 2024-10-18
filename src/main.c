@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 
+#include <string.h>
+
 #define PORT 8080
 #define MAX_MESSAGE_SIZE 256
 
@@ -36,8 +38,8 @@ static void handle_client(int client_fd) {
 }
 
 int main(int argc, char* argv[]) {
-    char* str = "light work";
-    char* encode = base64_encode((void*) str, 10);
+    char* str = argv[1];
+    char* encode = base64_encode((void*) str, strlen(str));
 
     printf("encode(%s)=%s\n", str, encode);
 
