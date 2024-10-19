@@ -61,10 +61,8 @@ bool http_parse(struct http_transaction* ta) {
     if (req_length <= 0) {
         return false;
     }
-    fprintf(stderr, "off: %d, len: %d\n", req_offset, req_length);
     req = bufio_offset2ptr(ta->buffer, req_offset);
     req[req_length - 2] = '\0';
-    fprintf(stderr, "request: %s\n", req);
     // expect header to match format: <METHOD> <PATH> <VERSION>
     char* method_str = strtok_r(req, " ", &save_ptr);
     if (method_str == NULL) {

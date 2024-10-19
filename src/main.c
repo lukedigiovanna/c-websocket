@@ -38,12 +38,6 @@ static void handle_client(int client_fd) {
 }
 
 int main(int argc, char* argv[]) {
-    char* str = argv[1];
-    char* encode = base64_encode((void*) str, strlen(str));
-
-    printf("encode(%s)=%s\n", str, encode);
-
-    return 0;
     // Set up a socket server
     int server_socket_fd = server_bind_and_listen(PORT);
 
