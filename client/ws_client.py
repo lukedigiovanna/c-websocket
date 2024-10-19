@@ -12,7 +12,7 @@ PORT = 8080
 RESOURCE = '/'
 
 def websocket_handshake(sock):
-    key = base64.b64encode(b"test_key").decode('utf-8')
+    key = base64.b64encode(b"the sample nonce").decode('utf-8')
     headers = (
         f"GET {RESOURCE} HTTP/1.1\r\n"
         f"Host: {HOST}:{PORT}\r\n"
@@ -24,17 +24,13 @@ def websocket_handshake(sock):
     
     headers_raw = headers.encode('utf-8')
 
-    print(f"Sending:\n{headers_raw.decode()}")
-
     sock.send(headers_raw)
 
     response = sock.recv(1024).decode('utf-8')
-    print(f'Response: {response}')
+    print(response)
 
     if "101 Switching Protocols" not in response:
         raise Exception("Handshake failed!")
-    
-    print("Handshake successful!\n", response)
 
 def encode_frame(data):
     frame_head = bytearray()
@@ -83,13 +79,13 @@ def websocket_client():
 
         # Send a message (frame)
         message = "Hello WebSocket!"
-        print(f"Sending: {message}")
-        frame = encode_frame(message)
-        sock.send(frame)
+        # print(f"Sending: {message}")
+        # frame = encode_frame(message)
+        # sock.send(frame)
 
-        # Receive a message (frame)
-        received_message = decode_frame(sock)
-        print(f"Received: {received_message}")
+        # # Receive a message (frame)
+        # received_message = decode_frame(sock)
+        # print(f"Received: {received_message}")
 
     finally:
         sock.close()
