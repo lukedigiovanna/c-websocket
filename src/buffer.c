@@ -37,15 +37,17 @@ void buffer_ensure_capacity(struct buffer* self, size_t len) {
     }
 }
 
-void buffer_append(struct buffer* self, void* data, size_t len) {
+void buffer_append(struct buffer* self, const void* data, size_t len) {
     buffer_ensure_capacity(self, len);
     memcpy(self->content + self->length, data, len);
     self->length += len;
 }
 
-void buffer_append_str(struct buffer* self, char* str) {
-    size_t len = strlen(str) + 1;
-    buffer_append(self, str, len);
+void buffer_append_str(struct buffer* self, const char* str) {
+    size_t len = strlen(str);
+    buffer_ensure_capacity(self, len + 1);
+    memcpy(self->content + self->length, str, len + 1);
+    self->length += len;
 }
 
 char* buffer_offset2ptr(struct buffer* self, size_t offset) {

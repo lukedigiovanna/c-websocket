@@ -13,7 +13,7 @@
 #define GUID_LENGTH 36
 static const char guid[GUID_LENGTH + 1] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-int websocket_sec_handshake(char* out, const char* secret) {
+int websocket_compute_secret(char* out, const char* secret) {
     char buffer[64];
     char hashed[64];
     size_t secret_len = strlen(secret);

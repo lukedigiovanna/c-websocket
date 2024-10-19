@@ -14,4 +14,4 @@ int websocket_init(struct websocket* ws, int sockfd);
 // Computes the handshake secret used to establish the websocket connection
 // Populates `out` with the computed handshake accept value using the given
 // base64 encoded `secret`. Returns non-zero error code on failure.
-int websocket_sec_handshake(char* out, const char* secret);
+int websocket_compute_secret(char* out, const char* secret);

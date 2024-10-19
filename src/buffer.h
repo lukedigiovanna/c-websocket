@@ -15,10 +15,10 @@ void buffer_destroy(struct buffer* self);
 void buffer_ensure_capacity(struct buffer* self, size_t len);
 
 // Appends `len` bytes of the raw data pointed to by `data` 
-void buffer_append(struct buffer* self, void* data, size_t len);
+void buffer_append(struct buffer* self, const void* data, size_t len);
 
 // Appends the given null-terminated string to the end of the buffer.
-void buffer_append_str(struct buffer* self, char* str);
+void buffer_append_str(struct buffer* self, const char* str);
 
 // Returns the pointer at the given offset in the buffer.
 // Ensures the offset is within the bounds of the buffer.

@@ -17,25 +17,11 @@
 #define MAX_MESSAGE_SIZE 256
 
 static void handle_client(int client_fd) {
-    struct bufio* buffer = bufio_create(client_fd);
-    
-    // parse as http request
     struct http_transaction ta;
-    http_init_transaction(&ta, buffer);
-    int rc;
-    if ((rc = http_parse(&ta)) != 0) {
-        fprintf(stderr, "http_parse: return non-zero rc=%d\n", rc);
-        return;
-    }
-
-    struct buffer* response_buffer = buffer_create(1024);
-    buffer_append_str(response_buffer, "HTTP/1.1 ");
-    buffer_append_str(response_buffer, "101 Switching Protocols\r\n");
-    buffer_append_str(response_buffer, "Other headers here.\r\n");
-    bufio_send_buffer(buffer, response_buffer);
-    buffer_destroy(response_buffer);
-
-    bufio_destroy(buffer);
+    http_init_transaction(&ta, client_fd);
+    http_parse(&ta);
+    http_handle_request(&ta);
+    http_destroy_transaction(&ta);
 }
 
 int main(int argc, char* argv[]) {
