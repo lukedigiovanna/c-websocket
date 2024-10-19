@@ -3,11 +3,14 @@
 #include "socket.h"
 #include "bufio.h"
 #include "http.h"
+#include "base64.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+
+#include <string.h>
 
 #define PORT 8080
 #define MAX_MESSAGE_SIZE 256

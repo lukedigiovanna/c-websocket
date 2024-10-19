@@ -3,8 +3,8 @@ CFLAGS=-g -O2 -pthread -Wall -Wmissing-prototypes
 # include lib directory into runtime path to facilitate dynamic linking
 LDFLAGS=-pthread
 
-HEADERS=socket.h bufio.h http.h buffer.h
-OBJ=main.o socket.o buffer.o bufio.o http.o
+HEADERS=socket.h bufio.h http.h buffer.h base64.h
+OBJ=main.o socket.o buffer.o bufio.o http.o base64.o
 
 all:    server $(OTHERS)
 
