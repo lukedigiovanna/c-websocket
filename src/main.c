@@ -4,6 +4,7 @@
 #include "bufio.h"
 #include "http.h"
 #include "base64.h"
+#include "websocket.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
