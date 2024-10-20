@@ -106,7 +106,12 @@ size_t bufio_ptr2offset(struct bufio* self, char* ptr) {
 }
 
 void bufio_send_buffer(struct bufio* self, struct buffer* buffer) {
-    send(self->fd, buffer_getptr(buffer), buffer_length(buffer) + 1, SOCK_STREAM);
+    char* data_ptr = buffer_getptr(buffer);
+    size_t data_length = buffer_length(buffer);
+    ssize_t bytes_sent = send(self->fd, data_ptr, data_length, 0);
+    if (bytes_sent < 0) {
+        perror("bufio_send_buffer");
+    }
 }
 
 #endif

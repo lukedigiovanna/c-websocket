@@ -75,20 +75,23 @@ static bool http_process_header(struct http_transaction* ta, char* header) {
     // First extract header name
     char* save_ptr;
     char* header_name = strtok_r(header, ": ", &save_ptr);
+    if (header_name == NULL) {
+        return false;
+    }
     char* header_value = strtok_r(NULL, " ", &save_ptr);
+    if (header_value == NULL) {
+        return false;
+    }
     if (!strcasecmp("Sec-WebSocket-Key", header_name)) {
         ta->websocket_key_offset = bufio_ptr2offset(ta->buffer, header_value);
-        return true;
     }
     else if (!strcasecmp("Sec-WebSocket-Version", header_name)) {
         ta->websocket_version_offset = bufio_ptr2offset(ta->buffer, header_value);
-        return true;
     }
     else if (!strcasecmp("Upgrade", header_name)) {
         ta->websocket_upgrade = true;
-        return true;
     }
-    return false;
+    return true;
 }
 
 void http_parse(struct http_transaction* ta) {
@@ -134,11 +137,14 @@ void http_parse(struct http_transaction* ta) {
             return;
         }
         header = bufio_offset2ptr(ta->buffer, header_offset);
-        if (header_len == 2 && !strcmp(header, CRLF)) {
+        if (header_len == 2) { // If just 2 then assume only read the CRLF
             break;
         }
-        header[header_len - 2] = '\0';
-        http_process_header(ta, header);
+        header[header_len - 2] = '\0'; // Remove the CRLF from the string
+        if (!http_process_header(ta, header)) {
+            ta->parse_error = true;
+            return;
+        }
     }
 
     ta->parse_error = false;
@@ -167,6 +173,7 @@ void http_add_response_content(struct http_transaction* ta, const char* content)
 }
 
 void http_send_response(struct http_transaction* ta) {
+    printf("Sending response:\n%s\n", buffer_getptr(ta->response));
     bufio_send_buffer(ta->buffer, ta->response);
 }
 

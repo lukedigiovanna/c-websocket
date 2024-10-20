@@ -35,7 +35,7 @@ void base64_encode(char* out, const void* data, size_t data_len) {
     for (int i = 0; i < num_blocks; i++) {
         // Encode the 3-byte block
         for (;c<min(i*4+4,encoded_chars_len);c++) {
-            size_t v;
+            size_t v = 0;
             switch (c % 4) {
                 case 0:
                     v = b_data[i*3] >> 2;
