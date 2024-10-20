@@ -16,12 +16,13 @@
 #define PORT 8080
 #define MAX_MESSAGE_SIZE 256
 
-static void handle_client(int client_fd) {
+static bool handle_client(int client_fd) {
     struct http_transaction ta;
     http_init_transaction(&ta, client_fd);
     http_parse(&ta);
-    http_handle_request(&ta);
+    bool rc = http_handle_request(&ta);
     http_destroy_transaction(&ta);
+    return rc;
 }
 
 int main(int argc, char* argv[]) {
@@ -41,9 +42,14 @@ int main(int argc, char* argv[]) {
 
         fprintf(stderr, "Received client: %s:%d\n", buf, ntohs(client_address.sin_port));
 
-        handle_client(client_fd);
+        bool keep_alive = http_handle_client(client_fd);
 
-        close(client_fd);
+        if (!keep_alive) {
+            close(client_fd);
+        }
+        else {
+            recv(client_fd, )
+        }
     }
 
     close(server_socket_fd);

@@ -64,4 +64,7 @@ void http_add_response_content(struct http_transaction* ta, const char* content)
 
 void http_send_response(struct http_transaction* ta);
 
-void http_handle_request(struct http_transaction* ta);
+// Processes the given parsed HTTP request.
+// Returns true if the corresponding socket should remain open (in the case of
+// establishing a websocket connection for example) or false otherwise.
+bool http_handle_request(struct http_transaction* ta);

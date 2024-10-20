@@ -191,14 +191,14 @@ static void http_send_bad_request(struct http_transaction* ta, const char* reaso
     http_send_response(ta);
 }
 
-void http_handle_request(struct http_transaction* ta) {
+bool http_handle_request(struct http_transaction* ta) {
     if (ta->parse_error) {
         http_send_bad_request(ta, "Malformed HTTP request");
-        return;
+        return false;
     }
     if (ta->version != HTTP_VERSION_1_1) {
         http_send_bad_request(ta, "Only HTTP/1.1 is supported");
-        return;
+        return false;
     }
     if (ta->websocket_upgrade) {
         if (ta->websocket_key_offset) {
@@ -213,10 +213,11 @@ void http_handle_request(struct http_transaction* ta) {
             http_add_response_header(ta, "Upgrade", "websocket");
             http_end_response_headers(ta);
             http_send_response(ta);
-            return;
+            return true;
         }
     }
     http_send_bad_request(ta, "Unsupported operation");
+    return false;
 }
 
 #endif
