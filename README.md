@@ -10,7 +10,7 @@ Read about implementing a WebSocket server from scratch in my article:
 
 ## Building
 
-This server is developed for Linux and can run on MacOS.
+This server is developed for Linux and MacOS.
 
 Run the `make` in `src` to get the `server` executable for the demo.
  
