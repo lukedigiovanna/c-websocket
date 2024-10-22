@@ -202,10 +202,9 @@ bool http_handle_request(struct http_transaction* ta) {
     }
     if (ta->websocket_upgrade) {
         if (ta->websocket_key_offset) {
-            char sec_buffer[64];
             char* websocket_key = bufio_offset2ptr(ta->buffer, ta->websocket_key_offset);
+            char sec_buffer[64];
             websocket_compute_secret(sec_buffer, websocket_key);
-            printf("got ws key: %s -- compute secret: %s\n", websocket_key, sec_buffer);
             ta->response_code = HTTP_SWITCHING_PROTOCOLS;
             http_start_response_headers(ta);
             http_add_response_header(ta, "Sec-WebSocket-Accept", sec_buffer);
